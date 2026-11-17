@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+{% block title %}Dashboard – SEI Digital{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-start justify-content-between mb-2">
+  <div>
+    <div class="page-title">Dashboard</div>
+    <div class="page-subtitle">Visão geral do sistema SEI Digital</div>
+  </div>
+  <div class="d-flex gap-2">
+    {% if current_user.is_gestor %}
+    <a href="{{ url_for('alunos_novo') }}" class="btn-primary-sei">
+      <i class="bi bi-plus-lg"></i> Novo Aluno
+    </a>
+    {% endif %}
+    <a href="{{ url_for('relatorios_novo') }}" class="btn-outline-sei">
+      <i class="bi bi-file-plus"></i> Novo Relatório
+    </a>
+  </div>
+</div>
+
+<!-- STAT CARDS -->
+<div class="row g-3 mb-4">
+  <div class="col-6 col-lg-3">
+    <div class="stat-card">
+      <div class="d-flex align-items-start justify-content-between">
+        <div>
+          <div class="stat-label">Total de Alunos</div>
+          <div class="stat-value">{{ total_alunos }}</div>
+          <div class="stat-desc">Alunos neurodivergentes cadastrados</div>
+        </div>
+        <div class="stat-icon" style="background:#ede9fe; color:#6d28d9;">
+          <i class="bi bi-people-fill"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="stat-card">
+      <div class="d-flex align-items-start justify-content-between">
+        <div>
+          <div class="stat-label">Relatórios</div>
+          <div class="stat-value">{{ total_relatorios }}</div>
+          <div class="stat-desc">Ocorrências registradas</div>
+        </div>
+        <div class="stat-icon" style="background:#dbeafe; color:#2563eb;">
+          <i class="bi bi-file-text-fill"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="stat-card">
+      <div class="d-flex align-items-start justify-content-between">
+        <div>
+          <div class="stat-label">Séries Atendidas</div>
+          <div class="stat-value">{{ series_distintas }}</div>
+          <div class="stat-desc">Séries diferentes</div>
+        </div>
+        <div class="stat-icon" style="background:#dcfce7; color:#16a34a;">
+          <i class="bi bi-mortarboard-fill"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="stat-card">
+      <div class="d-flex align-items-start justify-content-between">
+        <div>
+          <div class="stat-label">Média Relatórios</div>
+          <div class="stat-value">{{ media }}</div>
+          <div class="stat-desc">Por aluno</div>
+        </div>
+        <div class="stat-icon" style="background:#fef9c3; color:#a16207;">
+          <i class="bi bi-graph-up-arrow"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- DISTRIBUTION CHARTS -->
+<div class="row g-3 mb-4">
+  <!-- Distribuição por Neurodivergência -->
+  <div class="col-md-6">
+    <div class="card-sei" style="height:100%">
+      <div class="fw-600 mb-1" style="font-size:15px;font-weight:600;">Distribuição por Neurodivergência</div>
+      <div class="mb-3" style="font-size:13px;color:#94a3b8;">Tipos de neurodivergência cadastrados</div>
+      {% if neuro_dist %}
+        {% set max_n = neuro_dist | map(attribute=1) | max %}
+        {% for tipo, count in neuro_dist %}
+        <div class="dist-row">
+          <span class="dist-label">{{ tipo }}</span>
+          <div class="dist-bar">
+            <div class="fill" style="width:{{ (count / max_n * 100) | int }}%"></div>
+          </div>
+          <span class="dist-count">{{ count }}</span>
+        </div>
+        {% endfor %}
+      {% else %}
+        <p class="text-muted" style="font-size:13px;">Nenhum dado disponível.</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Alunos por Série -->
+  <div class="col-md-6">
+    <div class="card-sei" style="height:100%">
+      <div class="fw-600 mb-1" style="font-size:15px;font-weight:600;">Alunos por Série</div>
+      <div class="mb-3" style="font-size:13px;color:#94a3b8;">Distribuição por ano escolar</div>
+      {% if serie_dist %}
+        {% set max_s = serie_dist | map(attribute=1) | max %}
+        {% for serie, count in serie_dist %}
+        <div class="dist-row">
+          <span class="dist-label">{{ serie }}</span>
+          <div class="dist-bar">
+            <div class="fill" style="width:{{ (count / max_s * 100) | int }}%; background:#16a34a;"></div>
+          </div>
+          <span class="dist-count">{{ count }}</span>
+        </div>
+        {% endfor %}
+      {% else %}
+        <p class="text-muted" style="font-size:13px;">Nenhum dado disponível.</p>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<!-- RECENT REPORTS -->
+<div class="card-sei">
+  <div class="d-flex align-items-center justify-content-between mb-3">
+    <div>
+      <div style="font-size:15px;font-weight:600;">Relatórios Recentes</div>
+      <div style="font-size:13px;color:#94a3b8;">Últimas ocorrências registradas</div>
+    </div>
+    <a href="{{ url_for('relatorios_lista') }}" class="btn-outline-sei" style="padding:7px 14px;font-size:13px;">
+      Ver todos
+    </a>
+  </div>
+
+  {% if relatorios_recentes %}
+    {% for rel in relatorios_recentes %}
+    <div class="recent-report" style="border-left-color:
+      {% if rel.tipo == 'Progresso' %}#2563eb
+      {% elif rel.tipo == 'Conquista' %}#d97706
+      {% elif rel.tipo == 'Comportamento' %}#dc2626
+      {% else %}#94a3b8{% endif %};">
+      <div class="d-flex align-items-center gap-2 mb-1">
+        <span class="badge-sei {{ tipo_badge.get(rel.tipo, 'badge-ocorrencia') }}">{{ rel.tipo }}</span>
+        <span style="font-size:12px;color:#64748b;">{{ rel.aluno.nome_completo }}</span>
+        <span class="ms-auto" style="font-size:12px;color:#94a3b8;">
+          {{ rel.data_ocorrencia.strftime('%d/%m/%Y') }}
+        </span>
+      </div>
+      <div class="rr-title">{{ rel.titulo }}</div>
+      <div class="rr-desc">{{ rel.descricao | truncate(130) }}</div>
+    </div>
+    {% endfor %}
+  {% else %}
+    <div class="empty-state" style="padding:30px;">
+      <i class="bi bi-file-earmark-x"></i>
+      <p>Nenhum relatório registrado ainda.</p>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

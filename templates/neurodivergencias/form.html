@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}{% if neuro %}Editar{% else %}Nova{% endif %} Neurodivergência – SEI Digital{% endblock %}
+
+{% macro v(campo, salvo='') -%}
+  {{ dados.get(campo, salvo) if dados else salvo }}
+{%- endmacro %}
+
+{% block content %}
+<a href="{{ url_for('neuro_detalhe', id=neuro.id) if neuro else url_for('neuro_lista') }}" class="back-link">
+  <i class="bi bi-arrow-left"></i> Voltar
+</a>
+
+<div class="page-title">{% if neuro %}Editar Neurodivergência{% else %}Nova Neurodivergência{% endif %}</div>
+<div class="page-subtitle">Informações de referência exibidas aos profissionais</div>
+
+<form method="POST"
+      action="{{ url_for('neuro_editar', id=neuro.id) if neuro else url_for('neuro_nova', voltar_aluno=request.args.get('voltar_aluno')) }}"
+      novalidate>
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <div class="form-section">
+    <div class="row g-3 mb-3">
+      <div class="col-md-8">
+        <label class="form-label">Nome *</label>
+        <input type="text" name="nome" class="form-control" maxlength="100"
+               placeholder="Ex.: Transtorno do Espectro Autista"
+               value="{{ v('nome', neuro.nome if neuro else '') }}" required>
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">Sigla</label>
+        <input type="text" name="sigla" class="form-control" maxlength="20"
+               placeholder="Ex.: TEA"
+               value="{{ v('sigla', (neuro.sigla or '') if neuro else '') }}">
+      </div>
+    </div>
+    <div class="mb-0">
+      <label class="form-label">Descrição *</label>
+      <textarea name="descricao" class="form-control" rows="5"
+                placeholder="Características principais e orientações gerais para os profissionais..."
+                required>{{ v('descricao', neuro.descricao if neuro else '') }}</textarea>
+    </div>
+  </div>
+
+  <div class="d-flex justify-content-end gap-2 mt-2 mb-4">
+    <a href="{{ url_for('neuro_detalhe', id=neuro.id) if neuro else url_for('neuro_lista') }}" class="btn-outline-sei">Cancelar</a>
+    <button type="submit" class="btn-primary-sei">
+      <i class="bi bi-check-lg"></i> {% if neuro %}Atualizar{% else %}Cadastrar{% endif %}
+    </button>
+  </div>
+</form>
+{% endblock %}

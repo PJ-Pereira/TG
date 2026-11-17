@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block title %}Diagnóstico – {{ aluno.nome_completo }} – SEI Digital{% endblock %}
+
+{% macro v(campo, salvo='') -%}
+  {{ dados.get(campo, salvo) if dados else salvo }}
+{%- endmacro %}
+
+{% block content %}
+<a href="{{ url_for('alunos_detalhe', id=aluno.id) }}" class="back-link">
+  <i class="bi bi-arrow-left"></i> Voltar para a ficha do aluno
+</a>
+
+<div class="page-title">{% if diag %}Editar Diagnóstico{% else %}Cadastrar Diagnóstico{% endif %}</div>
+<div class="page-subtitle">{{ aluno.nome_completo }} • {{ aluno.serie }} • Matrícula {{ aluno.matricula }}</div>
+
+<form method="POST" action="{{ url_for('diagnostico_form', aluno_id=aluno.id) }}" novalidate>
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+  <!-- NEURODIVERGÊNCIAS -->
+  <div class="form-section">
+    <div class="d-flex align-items-start justify-content-between gap-2">
+      <div>
+        <div class="form-section-title">Neurodivergências *</div>
+        <div class="form-section-sub">Selecione uma ou mais neurodivergências presentes no diagnóstico</div>
+      </div>
+      <a href="{{ url_for('neuro_nova', voltar_aluno=aluno.id) }}" class="btn-outline-sei" style="padding:6px 12px;font-size:13px;">
+        <i class="bi bi-plus-lg"></i> Nova neurodivergência
+      </a>
+    </div>
+
+    {% if neuros %}
+    <div class="row g-2">
+      {% for n in neuros %}
+      <div class="col-md-6">
+        <label class="neuro-check">
+          <input type="checkbox" class="form-check-input" name="neurodivergencias" value="{{ n.id }}"
+                 {% if n.id in marcadas %}checked{% endif %}>
+          <span class="badge-sei {{ neuro_badge(n) }}">{{ neuro_rotulo(n) }}</span>
+          <span>{{ n.nome }}</span>
+        </label>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <p class="text-muted mb-0" style="font-size:13px;">Nenhuma neurodivergência cadastrada. Cadastre uma antes de continuar.</p>
+    {% endif %}
+  </div>
+
+  <!-- DIAGNÓSTICO E NECESSIDADES -->
+  <div class="form-section">
+    <div class="form-section-title">Diagnóstico e Necessidades</div>
+    <div class="form-section-sub">Informações do diagnóstico oficial e necessidades específicas</div>
+
+    <div class="mb-3">
+      <label class="form-label">Diagnóstico *</label>
+      <textarea name="descricao" class="form-control" rows="3"
+                placeholder="Descreva o diagnóstico conforme o laudo..." required>{{ v('descricao', diag.descricao if diag else '') }}</textarea>
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Necessidades Específicas *</label>
+      <textarea name="necessidades" class="form-control" rows="3"
+                placeholder="Descreva as necessidades específicas do aluno no ambiente escolar..." required>{{ v('necessidades', diag.necessidades if diag else '') }}</textarea>
+    </div>
+    <div class="mb-0">
+      <label class="form-label">Acomodações Necessárias *</label>
+      <textarea name="acomodacoes" class="form-control" rows="3"
+                placeholder="Liste as acomodações e adaptações recomendadas (ex.: tempo estendido em provas)..." required>{{ v('acomodacoes', diag.acomodacoes if diag else '') }}</textarea>
+    </div>
+  </div>
+
+  <!-- ACTIONS -->
+  <div class="d-flex justify-content-end gap-2 mt-2 mb-4">
+    <a href="{{ url_for('alunos_detalhe', id=aluno.id) }}" class="btn-outline-sei">
+      {% if diag %}Cancelar{% else %}Registrar depois{% endif %}
+    </a>
+    <button type="submit" class="btn-primary-sei">
+      <i class="bi bi-check-lg"></i> {% if diag %}Atualizar{% else %}Salvar Diagnóstico{% endif %}
+    </button>
+  </div>
+</form>
+{% endblock %}

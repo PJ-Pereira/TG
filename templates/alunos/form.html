@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% block title %}{% if aluno %}Editar Aluno{% else %}Novo Aluno{% endif %} – SEI Digital{% endblock %}
+
+{# valor do campo: o que foi digitado (se houve erro) ou o valor salvo do aluno #}
+{% macro v(campo, salvo='') -%}
+  {{ dados.get(campo, salvo) if dados else salvo }}
+{%- endmacro %}
+
+{% block content %}
+<a href="{{ url_for('alunos_lista') if not aluno else url_for('alunos_detalhe', id=aluno.id) }}" class="back-link">
+  <i class="bi bi-arrow-left"></i> Voltar
+</a>
+
+<div class="page-title">{% if aluno %}Editar Aluno{% else %}Novo Aluno{% endif %}</div>
+<div class="page-subtitle">
+  {% if aluno %}Atualize as informações do aluno{% else %}Cadastre um novo aluno neurodivergente. O diagnóstico é registrado na etapa seguinte.{% endif %}
+</div>
+
+<form method="POST"
+      action="{{ url_for('alunos_editar', id=aluno.id) if aluno else url_for('alunos_novo') }}"
+      novalidate>
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+  <!-- INFORMAÇÕES PESSOAIS -->
+  <div class="form-section">
+    <div class="form-section-title">Informações Pessoais</div>
+    <div class="form-section-sub">Dados básicos do aluno</div>
+
+    <div class="row g-3 mb-3">
+      <div class="col-md-4">
+        <label class="form-label">Matrícula *</label>
+        <input type="text" name="matricula" class="form-control" maxlength="20"
+               placeholder="Número de matrícula"
+               value="{{ v('matricula', aluno.matricula if aluno else '') }}" required>
+      </div>
+      <div class="col-md-8">
+        <label class="form-label">Nome Completo *</label>
+        <input type="text" name="nome_completo" class="form-control"
+               placeholder="Digite o nome completo do aluno"
+               value="{{ v('nome_completo', aluno.nome_completo if aluno else '') }}" required>
+      </div>
+    </div>
+
+    <div class="row g-3 mb-0">
+      <div class="col-md-6">
+        <label class="form-label">Data de Nascimento *</label>
+        <input type="date" name="data_nascimento" class="form-control"
+               value="{{ v('data_nascimento', aluno.data_nascimento.strftime('%Y-%m-%d') if aluno else '') }}" required>
+      </div>
+      <div class="col-md-6">
+        <label class="form-label">Série *</label>
+        {% set serie_atual = v('serie', aluno.serie if aluno else '') %}
+        <select name="serie" class="form-select" required>
+          <option value="">Selecione a série</option>
+          {% for s in series %}
+          <option value="{{ s }}" {% if serie_atual == s %}selected{% endif %}>{{ s }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- PERFIL PEDAGÓGICO -->
+  <div class="form-section">
+    <div class="form-section-title">Perfil Pedagógico</div>
+    <div class="form-section-sub">Pontos fortes e desafios do aluno</div>
+
+    <div class="mb-3">
+      <label class="form-label">Pontos Fortes *</label>
+      <textarea name="pontos_fortes" class="form-control" rows="3"
+                placeholder="Descreva os pontos fortes e habilidades do aluno..." required>{{ v('pontos_fortes', aluno.pontos_fortes if aluno else '') }}</textarea>
+    </div>
+    <div class="mb-0">
+      <label class="form-label">Desafios *</label>
+      <textarea name="desafios" class="form-control" rows="3"
+                placeholder="Descreva os principais desafios enfrentados pelo aluno..." required>{{ v('desafios', aluno.desafios if aluno else '') }}</textarea>
+    </div>
+  </div>
+
+  <!-- CONTATO DO RESPONSÁVEL -->
+  <div class="form-section">
+    <div class="form-section-title">Contato do Responsável</div>
+    <div class="form-section-sub">Informações para contato</div>
+
+    <div class="mb-3">
+      <label class="form-label">Nome do Responsável *</label>
+      <input type="text" name="nome_responsavel" class="form-control"
+             placeholder="Digite o nome do responsável"
+             value="{{ v('nome_responsavel', aluno.nome_responsavel if aluno else '') }}" required>
+    </div>
+    <div class="mb-0">
+      <label class="form-label">Telefone de Contato *</label>
+      <input type="text" name="telefone_responsavel" class="form-control"
+             placeholder="(00) 00000-0000"
+             value="{{ v('telefone_responsavel', aluno.telefone_responsavel if aluno else '') }}" required>
+    </div>
+  </div>
+
+  <!-- ACTIONS -->
+  <div class="d-flex justify-content-end gap-2 mt-2 mb-4">
+    <a href="{{ url_for('alunos_lista') if not aluno else url_for('alunos_detalhe', id=aluno.id) }}"
+       class="btn-outline-sei">Cancelar</a>
+    <button type="submit" class="btn-primary-sei">
+      {% if aluno %}<i class="bi bi-check-lg"></i> Atualizar{% else %}Continuar para o diagnóstico <i class="bi bi-arrow-right"></i>{% endif %}
+    </button>
+  </div>
+</form>
+{% endblock %}

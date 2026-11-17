@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="csrf-token" content="{{ csrf_token() }}">
+  <title>Painel Administrativo – SEI Digital</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+</head>
+<body data-inatividade="{{ minutos_inatividade }}" data-ping="{{ url_for('sessao_ping') }}" data-sair="{{ url_for('logout', inatividade=1) }}">
+<div class="admin-wrapper">
+
+  <!-- ADMIN HEADER -->
+  <div class="admin-header">
+    <div class="logo-area">
+      <div class="logo-box"><i class="bi bi-shield-lock-fill"></i></div>
+      <div>
+        <div class="logo-text">SEI Digital Admin</div>
+        <div class="logo-sub">Painel de Administração</div>
+      </div>
+    </div>
+    <div class="d-flex align-items-center gap-2" style="font-size:14px;color:#374151;font-weight:500;">
+      <i class="bi bi-person-circle" style="color:#6d28d9;font-size:18px;"></i>
+      {{ current_user.nome }}
+      <a href="{{ url_for('logout') }}" style="margin-left:12px;font-size:13px;color:#94a3b8;text-decoration:none;">
+        <i class="bi bi-box-arrow-right"></i> Sair
+      </a>
+    </div>
+  </div>
+
+  <!-- ADMIN CONTENT -->
+  <div class="admin-content">
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for category, msg in messages %}
+        <div class="alert alert-{{ category }} alert-dismissible fade show">
+          {{ msg }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+      {% endfor %}
+    {% endwith %}
+
+    <div class="mb-4">
+      <h1 class="page-title">Painel Administrativo</h1>
+      <div class="page-subtitle" style="margin-bottom:0;">Gerencie os usuários do sistema SEI Digital</div>
+    </div>
+
+    {% if solicitacoes %}
+    <!-- SOLICITAÇÕES DE REDEFINIÇÃO DE SENHA -->
+    <div class="card-sei mb-4" style="padding:0;overflow:hidden;border-color:#fcd34d;">
+      <div class="px-4 py-3" style="background:#fffbeb;border-bottom:1px solid #fde68a;">
+        <div style="font-size:15px;font-weight:600;color:#92400e;">
+          <i class="bi bi-key-fill"></i> Solicitações de redefinição de senha ({{ solicitacoes | length }})
+        </div>
+        <div style="font-size:13px;color:#a16207;">
+          Defina uma nova senha pelo ícone de lápis e envie-a ao email do usuário.
+          A solicitação é encerrada automaticamente quando a senha é alterada.
+        </div>
+      </div>
+      <table class="table-sei">
+        <thead>
+          <tr><th>Usuário</th><th>Email</th><th>Solicitado em</th><th style="text-align:right;padding-right:16px;">Ações</th></tr>
+        </thead>
+        <tbody>
+          {% for sol in solicitacoes %}
+          <tr>
+            <td style="padding-left:16px;font-weight:500;">{{ sol.usuario.nome }}</td>
+            <td style="color:#64748b;">{{ sol.usuario.email }}</td>
+            <td style="color:#64748b;">{{ sol.criado_em.strftime('%d/%m/%Y %H:%M') }}</td>
+            <td style="text-align:right;padding-right:16px;white-space:nowrap;">
+              <button class="btn-outline-sei" style="padding:5px 12px;font-size:13px;"
+                      data-bs-toggle="modal" data-bs-target="#modalEditar{{ sol.usuario.id }}">
+                <i class="bi bi-pencil"></i> Definir nova senha
+              </button>
+              <form method="POST" action="{{ url_for('admin_dispensar_solicitacao', id=sol.id) }}" style="display:inline;">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="btn-icon edit" title="Marcar como atendida sem alterar a senha">
+                  <i class="bi bi-check2"></i>
+                </button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% endif %}
+
+    <!-- TABLE CARD -->
+    <div class="card-sei" style="padding:0;overflow:hidden;">
+      <div class="d-flex align-items-center justify-content-between px-4 py-3"
+           style="border-bottom:1px solid #f1f5f9;">
+        <div>
+          <div style="font-size:15px;font-weight:600;">Usuários do Sistema</div>
+          <div style="font-size:13px;color:#94a3b8;">Gerencie coordenadores e professores</div>
+        </div>
+        <button class="btn-primary-sei" data-bs-toggle="modal" data-bs-target="#modalNovoUsuario">
+          <i class="bi bi-plus-lg"></i> Novo Usuário
+        </button>
+      </div>
+
+      {% if usuarios %}
+      <table class="table-sei">
+        <thead>
+          <tr>
+            <th>Nome</th>
+            <th>Cargo</th>
+            <th>Email</th>
+            <th>Perfil</th>
+            <th style="text-align:right;padding-right:24px;">Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for u in usuarios %}
+          <tr>
+            <td style="padding-left:16px;font-weight:500;">{{ u.nome }}</td>
+            <td style="color:#64748b;">{{ u.cargo or '—' }}</td>
+            <td style="color:#64748b;">{{ u.email }}</td>
+            <td>
+              {% if u.perfil == 'gestor' %}
+                <span class="badge-sei badge-coordenador">Coordenador</span>
+              {% else %}
+                <span class="badge-sei badge-professor">Professor</span>
+              {% endif %}
+            </td>
+            <td style="text-align:right;padding-right:16px;">
+              <button class="btn-icon edit"
+                      title="Editar usuário"
+                      data-bs-toggle="modal"
+                      data-bs-target="#modalEditar{{ u.id }}">
+                <i class="bi bi-pencil"></i>
+              </button>
+              <button class="btn-icon danger"
+                      title="Excluir usuário"
+                      data-bs-toggle="modal"
+                      data-bs-target="#modalExcluir{{ u.id }}">
+                <i class="bi bi-trash3"></i>
+              </button>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <div class="empty-state" style="padding:48px;">
+        <i class="bi bi-people"></i>
+        <p>Nenhum usuário cadastrado ainda. Crie o primeiro usando o botão acima.</p>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     MODAL – NOVO USUÁRIO
+══════════════════════════════════════ -->
+<div class="modal fade modal-sei" id="modalNovoUsuario" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div>
+          <h5 class="modal-title">Novo Usuário</h5>
+          <div style="font-size:13px;color:#94a3b8;margin-top:2px;">Preencha os dados para criar um novo usuário</div>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form method="POST" action="{{ url_for('admin_criar_usuario') }}" novalidate>
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label">Nome *</label>
+            <input type="text" name="nome" class="form-control" placeholder="Nome completo" required autofocus>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Cargo</label>
+            <input type="text" name="cargo" class="form-control" placeholder="Ex.: Professora de Matemática, Psicóloga, EFEI">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Email *</label>
+            <input type="email" name="email" class="form-control" placeholder="email@seidigital.com" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Senha *</label>
+            <input type="password" name="senha" class="form-control" placeholder="Mínimo 6 caracteres" required>
+          </div>
+          <div class="mb-0">
+            <label class="form-label">Perfil *</label>
+            <select name="perfil" class="form-select" required>
+              <option value="professor">Professor</option>
+              <option value="gestor">Coordenador</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-outline-sei" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn-primary-sei">
+            <i class="bi bi-person-plus"></i> Criar
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     MODAIS – EDITAR / EXCLUIR (por usuário)
+══════════════════════════════════════ -->
+{% for u in usuarios %}
+
+<!-- Modal Editar -->
+<div class="modal fade modal-sei" id="modalEditar{{ u.id }}" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div>
+          <h5 class="modal-title">Editar Usuário</h5>
+          <div style="font-size:13px;color:#94a3b8;margin-top:2px;">Atualize os dados de {{ u.nome }}</div>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form method="POST" action="{{ url_for('admin_editar_usuario', id=u.id) }}" novalidate>
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label">Nome *</label>
+            <input type="text" name="nome" class="form-control" value="{{ u.nome }}" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Cargo</label>
+            <input type="text" name="cargo" class="form-control" value="{{ u.cargo or '' }}" placeholder="Ex.: Professora de Matemática, Psicóloga, EFEI">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Email *</label>
+            <input type="email" name="email" class="form-control" value="{{ u.email }}" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Nova Senha <span style="color:#94a3b8;font-weight:400;">(deixe em branco para manter)</span></label>
+            <input type="password" name="senha" class="form-control" placeholder="Nova senha">
+          </div>
+          <div class="mb-0">
+            <label class="form-label">Perfil *</label>
+            <select name="perfil" class="form-select" required>
+              <option value="professor" {% if u.perfil == 'professor' %}selected{% endif %}>Professor</option>
+              <option value="gestor"    {% if u.perfil == 'gestor'    %}selected{% endif %}>Coordenador</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-outline-sei" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn-primary-sei">
+            <i class="bi bi-check-lg"></i> Salvar
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Excluir -->
+<div class="modal fade modal-sei" id="modalExcluir{{ u.id }}" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Confirmar exclusão</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size:14px;color:#475569;margin:0;">
+          Tem certeza que deseja excluir o usuário <strong>{{ u.nome }}</strong>?
+          Esta ação não pode ser desfeita. Os relatórios registrados por este usuário permanecem no histórico dos alunos.
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-outline-sei" data-bs-dismiss="modal">Cancelar</button>
+        <form method="POST" action="{{ url_for('admin_excluir_usuario', id=u.id) }}" style="display:inline;">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button type="submit" class="btn-danger-sei">
+            <i class="bi bi-trash3"></i> Excluir
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endfor %}
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="{{ url_for('static', filename='js/sessao.js') }}"></script>
+</body>
+</html>

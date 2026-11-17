@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+{% block title %}Relatórios – SEI Digital{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-start justify-content-between mb-2">
+  <div>
+    <div class="page-title">Relatórios</div>
+    <div class="page-subtitle">Registro de ocorrências e progressos pedagógicos</div>
+  </div>
+  <a href="{{ url_for('relatorios_novo') }}" class="btn-primary-sei">
+    <i class="bi bi-plus-lg"></i> Novo Relatório
+  </a>
+</div>
+
+<!-- TOOLBAR -->
+<form method="GET" class="toolbar">
+  <div class="search-bar" style="flex:1;">
+    <i class="bi bi-search"></i>
+    <input type="text" name="busca" value="{{ busca }}" placeholder="Buscar relatórios...">
+  </div>
+  <select name="tipo" class="form-select" style="width:180px;height:40px;padding:8px 12px;font-size:14px;">
+    <option value="">Todos os tipos</option>
+    {% for t in tipos_relatorio %}
+    <option value="{{ t }}" {% if tipo_filtro == t %}selected{% endif %}>{{ t }}</option>
+    {% endfor %}
+  </select>
+  <button type="submit" class="btn-primary-sei" style="height:40px;padding:0 18px;">
+    <i class="bi bi-funnel"></i> Filtrar
+  </button>
+  {% if busca or tipo_filtro %}
+  <a href="{{ url_for('relatorios_lista') }}" class="btn-outline-sei" style="height:40px;padding:0 14px;">
+    <i class="bi bi-x-lg"></i> Limpar
+  </a>
+  {% endif %}
+</form>
+
+<!-- REPORT LIST -->
+{% if relatorios %}
+  {% for rel in relatorios %}
+  <div class="report-item">
+    <div class="d-flex align-items-start justify-content-between gap-2">
+      <div class="d-flex align-items-center gap-2 flex-wrap">
+        <span class="badge-sei {{ tipo_badge.get(rel.tipo, 'badge-ocorrencia') }}">{{ rel.tipo }}</span>
+        <span style="font-size:13px;color:#374151;font-weight:500;">{{ rel.aluno.nome_completo }}</span>
+        <span style="font-size:12px;color:#94a3b8;">•</span>
+        <span style="font-size:12px;color:#94a3b8;">{{ rel.data_ocorrencia | data_extenso }}</span>
+      </div>
+      {% if pode_alterar(rel) %}
+      <div class="d-flex gap-1">
+        <a href="{{ url_for('relatorios_editar', id=rel.id) }}" class="btn-icon edit" title="Editar relatório">
+          <i class="bi bi-pencil"></i>
+        </a>
+        <button class="btn-icon danger"
+                data-bs-toggle="modal"
+                data-bs-target="#modalExcluir{{ rel.id }}"
+                title="Excluir relatório">
+          <i class="bi bi-trash3"></i>
+        </button>
+      </div>
+      {% endif %}
+    </div>
+
+    <div class="report-title">{{ rel.titulo }}</div>
+    <div class="report-desc">{{ rel.descricao }}</div>
+    <div class="report-meta d-flex justify-content-between">
+      <span>Registrado por: {{ rel.registrado_por }}</span>
+      <span>
+        {{ rel.criado_em.strftime('%d/%m/%Y') }}
+        {% if rel.atualizado_em %}<span style="margin-left:8px;">• editado em {{ rel.atualizado_em.strftime('%d/%m/%Y') }}</span>{% endif %}
+      </span>
+    </div>
+  </div>
+
+  <!-- MODAL EXCLUIR (por relatório) -->
+  {% if pode_alterar(rel) %}
+  <div class="modal fade modal-sei" id="modalExcluir{{ rel.id }}" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Confirmar exclusão</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <p style="font-size:14px;color:#475569;margin:0;">
+            Tem certeza que deseja excluir este relatório?
+            Esta ação não pode ser desfeita.
+          </p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-outline-sei" data-bs-dismiss="modal">Cancelar</button>
+          <form method="POST" action="{{ url_for('relatorios_excluir', id=rel.id) }}" style="display:inline;">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="btn-danger-sei">
+              <i class="bi bi-trash3"></i> Excluir
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+  {% endfor %}
+
+{% else %}
+  <div class="empty-state">
+    <i class="bi bi-file-earmark-x"></i>
+    <p>
+      {% if busca or tipo_filtro %}
+        Nenhum relatório encontrado para os filtros aplicados.
+      {% else %}
+        Nenhum relatório registrado ainda.
+        <br>
+        <a href="{{ url_for('relatorios_novo') }}" class="btn-primary-sei mt-3" style="display:inline-flex;">
+          <i class="bi bi-plus-lg"></i> Registrar primeiro relatório
+        </a>
+      {% endif %}
+    </p>
+  </div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,459 @@
+/* ─── GLOBALS ─── */
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+  background-color: #f1f5f9;
+  color: #0f172a;
+  margin: 0;
+}
+
+/* ─── SIDEBAR ─── */
+.sidebar {
+  position: fixed;
+  top: 0; left: 0;
+  width: 260px;
+  height: 100vh;
+  background: #ffffff;
+  border-right: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  z-index: 100;
+  overflow-y: auto;
+}
+
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 24px 20px 20px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.sidebar-logo {
+  width: 40px; height: 40px;
+  background: #6d28d9;
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.sidebar-logo i { color: #fff; font-size: 20px; }
+
+.sidebar-brand { font-size: 15px; font-weight: 700; color: #0f172a; line-height: 1.2; }
+.sidebar-sub   { font-size: 11px; color: #94a3b8; }
+
+.sidebar-nav { padding: 16px 12px; flex: 1; }
+
+.nav-link-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  color: #475569;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background 0.15s, color 0.15s;
+  margin-bottom: 2px;
+}
+.nav-link-item i { font-size: 17px; }
+.nav-link-item:hover { background: #f8fafc; color: #0f172a; }
+.nav-link-item.active {
+  background: #f5f3ff;
+  color: #6d28d9;
+  border-left: 3px solid #6d28d9;
+  padding-left: 9px;
+}
+
+/* ─── LAYOUT ─── */
+.main-wrapper {
+  margin-left: 260px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.topbar {
+  background: #fff;
+  border-bottom: 1px solid #e2e8f0;
+  padding: 14px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+  position: sticky; top: 0; z-index: 50;
+}
+.topbar .user-icon { color: #6d28d9; font-size: 20px; }
+.topbar .logout-link {
+  margin-left: 12px;
+  font-size: 13px;
+  color: #94a3b8;
+  text-decoration: none;
+}
+.topbar .logout-link:hover { color: #ef4444; }
+
+.content-area { padding: 32px; flex: 1; }
+
+/* ─── PAGE HEADERS ─── */
+.page-title { font-size: 26px; font-weight: 700; color: #0f172a; margin-bottom: 4px; }
+.page-subtitle { font-size: 14px; color: #64748b; margin-bottom: 28px; }
+
+/* ─── CARDS ─── */
+.card-sei {
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  padding: 24px;
+}
+.card-sei-sm { padding: 20px; }
+
+/* ─── STAT CARDS ─── */
+.stat-card {
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  padding: 22px 24px;
+}
+.stat-card .stat-label { font-size: 13px; color: #64748b; font-weight: 500; margin-bottom: 8px; }
+.stat-card .stat-value { font-size: 32px; font-weight: 700; color: #0f172a; line-height: 1; }
+.stat-card .stat-desc  { font-size: 12px; color: #94a3b8; margin-top: 6px; }
+.stat-card .stat-icon  {
+  width: 38px; height: 38px;
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+}
+
+/* ─── PROGRESS BARS ─── */
+.dist-bar {
+  height: 6px;
+  border-radius: 99px;
+  background: #e2e8f0;
+  overflow: hidden;
+  flex: 1;
+}
+.dist-bar .fill { height: 100%; border-radius: 99px; background: #6d28d9; }
+.dist-row { display: flex; align-items: center; gap: 12px; font-size: 13px; margin-bottom: 10px; }
+.dist-row .dist-label { width: 150px; color: #374151; }
+.dist-row .dist-count { width: 24px; text-align: right; color: #64748b; font-weight: 600; }
+
+/* ─── ALUNO CARDS ─── */
+.aluno-card {
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  padding: 20px;
+  transition: box-shadow 0.15s;
+}
+.aluno-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,.07); }
+.aluno-card .aluno-name { font-size: 16px; font-weight: 600; color: #0f172a; margin-bottom: 10px; }
+.aluno-card .aluno-meta { font-size: 12.5px; color: #64748b; margin-bottom: 3px; }
+.aluno-card .aluno-meta span { color: #374151; font-weight: 500; }
+.aluno-card .btn-detalhes {
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  width: 100%;
+  padding: 9px;
+  margin-top: 16px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #374151;
+  text-decoration: none;
+  transition: background 0.15s;
+}
+.aluno-card .btn-detalhes:hover { background: #f1f5f9; color: #0f172a; }
+
+/* ─── REPORT ITEMS ─── */
+.report-item {
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  padding: 20px 24px;
+  margin-bottom: 12px;
+}
+.report-item .report-title { font-size: 16px; font-weight: 600; color: #0f172a; margin: 6px 0 8px; }
+.report-item .report-desc  { font-size: 13.5px; color: #475569; line-height: 1.55; }
+.report-item .report-meta  { font-size: 12px; color: #94a3b8; margin-top: 10px; }
+
+/* ─── RECENT REPORTS (dashboard) ─── */
+.recent-report {
+  border-left: 3px solid #6d28d9;
+  padding: 12px 16px;
+  margin-bottom: 12px;
+  background: #fafafa;
+  border-radius: 0 8px 8px 0;
+}
+.recent-report .rr-title  { font-size: 14px; font-weight: 600; color: #0f172a; }
+.recent-report .rr-desc   { font-size: 13px; color: #64748b; margin-top: 4px; line-height: 1.5; }
+.recent-report .rr-meta   { font-size: 12px; color: #94a3b8; margin-top: 6px; }
+
+/* ─── BADGES ─── */
+.badge-sei {
+  display: inline-flex; align-items: center;
+  padding: 3px 10px;
+  border-radius: 99px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* Neurodivergência */
+.badge-tdah         { background: #dbeafe; color: #1d4ed8; }
+.badge-autismo      { background: #ffedd5; color: #c2410c; }
+.badge-dislexia     { background: #dcfce7; color: #15803d; }
+.badge-altas        { background: #fef9c3; color: #a16207; }
+.badge-outro        { background: #f3e8ff; color: #7e22ce; }
+
+/* Tipo relatório */
+.badge-progresso    { background: #dbeafe; color: #1d4ed8; }
+.badge-conquista    { background: #fef3c7; color: #b45309; }
+.badge-comportamento{ background: #fee2e2; color: #b91c1c; }
+.badge-ocorrencia   { background: #f1f5f9; color: #475569; }
+
+/* Série */
+.badge-serie { background: #f1f5f9; color: #475569; font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 99px; }
+
+/* Perfil */
+.badge-coordenador { background: #ede9fe; color: #6d28d9; }
+.badge-professor   { background: #f0fdf4; color: #15803d; }
+
+/* ─── BUTTONS ─── */
+.btn-primary-sei {
+  background: #0f172a;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 18px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  display: inline-flex; align-items: center; gap: 6px;
+  text-decoration: none;
+  transition: background 0.15s;
+}
+.btn-primary-sei:hover { background: #1e293b; color: #fff; }
+
+.btn-danger-sei {
+  background: #fee2e2;
+  color: #b91c1c;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 18px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  display: inline-flex; align-items: center; gap: 6px;
+  text-decoration: none;
+  transition: background 0.15s;
+}
+.btn-danger-sei:hover { background: #fecaca; }
+
+.btn-outline-sei {
+  background: #fff;
+  color: #374151;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 10px 18px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  display: inline-flex; align-items: center; gap: 6px;
+  text-decoration: none;
+  transition: background 0.15s;
+}
+.btn-outline-sei:hover { background: #f8fafc; color: #0f172a; }
+
+.btn-icon {
+  background: none; border: none; cursor: pointer;
+  padding: 6px 8px; border-radius: 6px;
+  font-size: 16px; line-height: 1;
+  display: inline-flex; align-items: center;
+  transition: background 0.15s;
+}
+.btn-icon:hover { background: #f1f5f9; }
+.btn-icon.danger { color: #dc2626; }
+.btn-icon.danger:hover { background: #fee2e2; }
+.btn-icon.edit { color: #475569; }
+.btn-icon.edit:hover { background: #f1f5f9; }
+
+/* ─── FORMS ─── */
+.form-section {
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  padding: 28px;
+  margin-bottom: 20px;
+}
+.form-section-title { font-size: 15px; font-weight: 600; color: #0f172a; margin-bottom: 4px; }
+.form-section-sub   { font-size: 13px; color: #94a3b8; margin-bottom: 20px; }
+
+.form-label { font-size: 13.5px; font-weight: 500; color: #374151; margin-bottom: 6px; }
+.form-control, .form-select {
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 14px;
+  color: #0f172a;
+  background: #fff;
+  width: 100%;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.form-control:focus, .form-select:focus {
+  outline: none;
+  border-color: #6d28d9;
+  box-shadow: 0 0 0 3px rgba(109,40,217,.1);
+}
+textarea.form-control { resize: vertical; min-height: 90px; }
+
+.search-bar {
+  position: relative;
+  flex: 1;
+}
+.search-bar i {
+  position: absolute;
+  left: 12px; top: 50%;
+  transform: translateY(-50%);
+  color: #94a3b8;
+  font-size: 14px;
+  pointer-events: none;
+}
+.search-bar input {
+  padding-left: 36px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 14px;
+  height: 40px;
+  width: 100%;
+  background: #fff;
+}
+.search-bar input:focus {
+  outline: none;
+  border-color: #6d28d9;
+  box-shadow: 0 0 0 3px rgba(109,40,217,.1);
+}
+
+/* ─── TOOLBAR ─── */
+.toolbar {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 14px 18px;
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+/* ─── STUDENT DETAIL ─── */
+.detail-grid { display: grid; grid-template-columns: 1fr 300px; gap: 24px; }
+@media (max-width: 900px) { .detail-grid { grid-template-columns: 1fr; } }
+
+.detail-section { margin-bottom: 24px; }
+.detail-field-label { font-size: 12px; color: #94a3b8; font-weight: 500; text-transform: uppercase; letter-spacing: .04em; margin-bottom: 4px; }
+.detail-field-value { font-size: 14px; color: #0f172a; line-height: 1.55; }
+
+/* ─── MODALS ─── */
+.modal-sei .modal-content {
+  border-radius: 16px;
+  border: none;
+  box-shadow: 0 20px 60px rgba(0,0,0,.15);
+}
+.modal-sei .modal-header {
+  border-bottom: 1px solid #f1f5f9;
+  padding: 20px 24px 16px;
+}
+.modal-sei .modal-title { font-size: 17px; font-weight: 700; }
+.modal-sei .modal-body  { padding: 20px 24px; }
+.modal-sei .modal-footer { border-top: 1px solid #f1f5f9; padding: 14px 24px; }
+
+/* ─── ADMIN PANEL ─── */
+.admin-wrapper {
+  min-height: 100vh;
+  background: #f1f5f9;
+  display: flex;
+  flex-direction: column;
+}
+.admin-header {
+  background: #fff;
+  border-bottom: 1px solid #e2e8f0;
+  padding: 18px 40px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.admin-header .logo-area { display: flex; align-items: center; gap: 12px; }
+.admin-header .logo-box  {
+  width: 38px; height: 38px;
+  background: #6d28d9;
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+}
+.admin-header .logo-box i { color: #fff; font-size: 18px; }
+.admin-header .logo-text { font-size: 15px; font-weight: 700; color: #0f172a; }
+.admin-header .logo-sub  { font-size: 11px; color: #94a3b8; }
+.admin-content { padding: 40px; max-width: 1000px; margin: 0 auto; width: 100%; }
+
+.table-sei {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 14px;
+}
+.table-sei thead th {
+  background: #f8fafc;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  padding: 10px 16px;
+  border-bottom: 1px solid #e2e8f0;
+  border-top: 1px solid #e2e8f0;
+}
+.table-sei thead th:first-child { border-left: 1px solid #e2e8f0; border-radius: 8px 0 0 0; }
+.table-sei thead th:last-child  { border-right: 1px solid #e2e8f0; border-radius: 0 8px 0 0; }
+.table-sei tbody td {
+  padding: 14px 16px;
+  border-bottom: 1px solid #f1f5f9;
+  color: #374151;
+  vertical-align: middle;
+}
+.table-sei tbody tr:hover td { background: #fafafa; }
+.table-sei tbody tr:last-child td { border-bottom: none; }
+
+/* ─── ALERTS ─── */
+.alert {
+  border-radius: 10px;
+  padding: 12px 16px;
+  font-size: 13.5px;
+  border: none;
+  margin-bottom: 16px;
+}
+
+/* ─── BACK LINK ─── */
+.back-link {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 13px; color: #64748b; text-decoration: none;
+  margin-bottom: 16px;
+}
+.back-link:hover { color: #0f172a; }
+
+/* ─── EMPTY STATE ─── */
+.empty-state {
+  text-align: center; padding: 60px 20px;
+  color: #94a3b8;
+}
+.empty-state i { font-size: 48px; margin-bottom: 16px; display: block; }
+.empty-state p { font-size: 15px; }
+
+/* ── Seleção de neurodivergências (formulário de diagnóstico) ── */
+.neuro-check {
+  display: flex; align-items: center; gap: 10px;
+  border: 1px solid #e2e8f0; border-radius: 8px;
+  padding: 10px 12px; cursor: pointer; font-size: 13.5px; color: #334155;
+  width: 100%; transition: border-color .15s, background .15s;
+}
+.neuro-check:hover { border-color: #c4b5fd; background: #faf5ff; }
+.neuro-check .form-check-input { margin: 0; flex-shrink: 0; }
+.neuro-check:has(input:checked) { border-color: #7c3aed; background: #f5f3ff; }

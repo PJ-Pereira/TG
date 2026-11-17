@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block title %}{{ neuro.nome }} – SEI Digital{% endblock %}
+
+{% block content %}
+<a href="{{ url_for('neuro_lista') }}" class="back-link">
+  <i class="bi bi-arrow-left"></i> Voltar para Neurodivergências
+</a>
+
+<div class="d-flex align-items-start justify-content-between mb-4 flex-wrap gap-2">
+  <div>
+    <h1 class="page-title mb-1">{{ neuro.nome }}</h1>
+    {% if neuro.sigla %}<span class="badge-sei {{ neuro_badge(neuro) }}">{{ neuro.sigla }}</span>{% endif %}
+  </div>
+  {% if current_user.is_gestor %}
+  <div class="d-flex gap-2">
+    <a href="{{ url_for('neuro_editar', id=neuro.id) }}" class="btn-outline-sei">
+      <i class="bi bi-pencil"></i> Editar
+    </a>
+    <button class="btn-danger-sei" data-bs-toggle="modal" data-bs-target="#modalExcluir">
+      <i class="bi bi-trash3"></i> Excluir
+    </button>
+  </div>
+  {% endif %}
+</div>
+
+<div class="detail-grid">
+  <div>
+    <div class="card-sei mb-3">
+      <div style="font-size:15px;font-weight:600;margin-bottom:16px;">Descrição</div>
+      <div class="detail-field-value" style="white-space:pre-line;">{{ neuro.descricao }}</div>
+    </div>
+  </div>
+
+  <div>
+    <div class="card-sei">
+      <div style="font-size:15px;font-weight:600;">Alunos com esta neurodivergência</div>
+      <div style="font-size:12px;color:#94a3b8;margin-bottom:12px;">{{ alunos | length }} aluno(s)</div>
+      {% for a in alunos %}
+      <a href="{{ url_for('alunos_detalhe', id=a.id) }}" class="d-block mb-2"
+         style="border:1px solid #e2e8f0;border-radius:8px;padding:10px 12px;text-decoration:none;">
+        <div style="font-size:13.5px;font-weight:600;color:#0f172a;">{{ a.nome_completo }}</div>
+        <div style="font-size:12px;color:#94a3b8;">{{ a.serie }} • Matrícula {{ a.matricula }}</div>
+      </a>
+      {% else %}
+      <p style="font-size:13px;color:#94a3b8;margin:0;">Nenhum aluno vinculado.</p>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+{% if current_user.is_gestor %}
+<div class="modal fade modal-sei" id="modalExcluir" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Confirmar exclusão</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size:14px;color:#475569;margin:0;">
+          Tem certeza que deseja excluir <strong>{{ neuro.nome }}</strong>?
+          {% if alunos %}Ela está vinculada a {{ alunos | length }} diagnóstico(s) e só poderá ser excluída depois de removida deles.{% else %}Esta ação não pode ser desfeita.{% endif %}
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-outline-sei" data-bs-dismiss="modal">Cancelar</button>
+        <form method="POST" action="{{ url_for('neuro_excluir', id=neuro.id) }}" style="display:inline;">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button type="submit" class="btn-danger-sei"><i class="bi bi-trash3"></i> Excluir</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+{% endblock %}

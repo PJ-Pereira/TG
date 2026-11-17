@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block title %}{% if rel %}Editar Relatório{% else %}Novo Relatório{% endif %} – SEI Digital{% endblock %}
+
+{% block content %}
+<a href="{{ url_for('relatorios_lista') }}" class="back-link">
+  <i class="bi bi-arrow-left"></i> Voltar para Relatórios
+</a>
+
+<div class="page-title">{% if rel %}Editar Relatório{% else %}Novo Relatório{% endif %}</div>
+<div class="page-subtitle">
+  {% if rel %}Atualize as informações do relatório registrado por {{ rel.registrado_por }}{% else %}Registre uma ocorrência ou progresso pedagógico{% endif %}
+</div>
+
+<form method="POST" action="{{ url_for('relatorios_editar', id=rel.id) if rel else url_for('relatorios_novo') }}" novalidate>
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+  <!-- INFORMAÇÕES DO RELATÓRIO -->
+  <div class="form-section">
+    <div class="form-section-title">Informações do Relatório</div>
+    <div class="form-section-sub">Dados básicos da ocorrência</div>
+
+    <div class="mb-3">
+      <label class="form-label">Aluno *</label>
+      <select name="aluno_id" class="form-select" required>
+        <option value="">Selecione o aluno</option>
+        {% for aluno in alunos %}
+        <option value="{{ aluno.id }}"
+          {% if aluno_id_presel and aluno_id_presel | string == aluno.id | string %}selected{% endif %}>
+          {{ aluno.nome_completo }} – {{ aluno.serie }}
+        </option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="row g-3 mb-3">
+      <div class="col-md-6">
+        <label class="form-label">Tipo de Relatório *</label>
+        <select name="tipo" class="form-select" required>
+          <option value="">Selecione o tipo</option>
+          {% for t in tipos_relatorio %}
+          {% set tipo_atual = dados.get('tipo') if dados else (rel.tipo if rel else '') %}
+          <option value="{{ t }}" {% if tipo_atual == t %}selected{% endif %}>{{ t }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-6">
+        <label class="form-label">Data *</label>
+        <input type="date" name="data_ocorrencia" class="form-control"
+               value="{{ dados.get('data_ocorrencia') if dados else (rel.data_ocorrencia.strftime('%Y-%m-%d') if rel else hoje) }}" max="{{ hoje }}" required>
+      </div>
+    </div>
+
+    <div class="mb-0">
+      <label class="form-label">Registrado por *</label>
+      <input type="text" class="form-control" value="{{ rel.registrado_por if rel else current_user.nome }}" readonly
+             style="background:#f8fafc;color:#64748b;">
+      <div style="font-size:12px;color:#94a3b8;margin-top:4px;">{% if rel %}O autor do relatório não é alterado na edição.{% else %}Preenchido automaticamente com o usuário conectado.{% endif %}</div>
+    </div>
+  </div>
+
+  <!-- DESCRIÇÃO -->
+  <div class="form-section">
+    <div class="form-section-title">Descrição</div>
+    <div class="form-section-sub">Detalhes da ocorrência ou progresso</div>
+
+    <div class="mb-3">
+      <label class="form-label">Título *</label>
+      <input type="text" name="titulo" class="form-control"
+             placeholder="Resuma o relatório em poucas palavras"
+             value="{{ dados.get('titulo', '') if dados else (rel.titulo if rel else '') }}" maxlength="200" required>
+    </div>
+    <div class="mb-0">
+      <label class="form-label">Descrição Detalhada *</label>
+      <textarea name="descricao" class="form-control" rows="5"
+                placeholder="Descreva detalhadamente a ocorrência, comportamento observado, progresso alcançado ou situação relevante..."
+                required>{{ dados.get('descricao', '') if dados else (rel.descricao if rel else '') }}</textarea>
+    </div>
+  </div>
+
+  <!-- ACTIONS -->
+  <div class="d-flex justify-content-end gap-2 mt-2 mb-4">
+    <a href="{{ url_for('relatorios_lista') }}" class="btn-outline-sei">Cancelar</a>
+    <button type="submit" class="btn-primary-sei">
+      <i class="bi bi-floppy2"></i> {% if rel %}Atualizar Relatório{% else %}Salvar Relatório{% endif %}
+    </button>
+  </div>
+</form>
+{% endblock %}
